@@ -89,9 +89,10 @@ P.S. You can delete this when you're done too. It's your config now! :)
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
-
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 -- Set to true if you have a Nerd Font installed
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -102,7 +103,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, for help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -142,8 +143,8 @@ vim.opt.splitbelow = true
 -- Sets how neovim will display certain whitespace in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
-vim.opt.list = true
-vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+-- vim.opt.list = true
+-- vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = 'split'
@@ -539,9 +540,12 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
-        -- gopls = {},
-        -- pyright = {},
+        clangd = {},
+        gopls = {},
+        pyright = {},
+        arduino_language_server = {},
+        bashls = {},
+        tsserver = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -549,7 +553,6 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        -- tsserver = {},
         --
 
         lua_ls = {
@@ -735,16 +738,48 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
-    'folke/tokyonight.nvim',
+    'loctvl842/monokai-pro.nvim',
     priority = 1000, -- make sure to load this before all the other start plugins
     init = function()
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'monokai-pro'
 
-      -- You can configure highlights by doing something like
-      vim.cmd.hi 'Comment gui=none'
+      -- Set transparency for normal background
+      vim.api.nvim_set_hl(0, 'Normal', { bg = nil })
+      -- Set transparency for normal background
+      vim.api.nvim_set_hl(0, 'NormalNC', { bg = nil })
+      -- Set transparency for floating windows background
+      vim.api.nvim_set_hl(0, 'NormalFloat', { bg = nil })
+      -- Set transparency for line numbers
+      vim.api.nvim_set_hl(0, 'LineNr', { bg = nil })
+      -- Set transparency for the current line number
+      vim.api.nvim_set_hl(0, 'CursorLineNr', { bg = nil })
+      -- Reduce the opacity of the current line highlight
+      vim.api.nvim_set_hl(0, 'CursorLine', { bg = nil })
+      -- Make border separator transparent
+      vim.api.nvim_set_hl(0, 'NeoTreeWinSeparator', { bg = nil })
+      -- Make neotree transparent
+      vim.api.nvim_set_hl(0, 'NeoTreeNormal', { bg = nil })
+      -- Make neotree transparent
+      vim.api.nvim_set_hl(0, 'NeoTreeNormalNC', { bg = nil })
+      -- Make neotree transparent
+      vim.api.nvim_set_hl(0, 'NeoTreeSignColumn', { bg = nil })
+      -- Make neotree transparent
+      vim.api.nvim_set_hl(0, 'NeoTreeEndOfBuffer', { bg = nil })
+      -- Make gitsigns transparent
+      vim.api.nvim_set_hl(0, 'SignColumn', { bg = nil })
+      -- Define the IndentBlankline highlight group
+      vim.api.nvim_set_hl(0, 'IndentBlankline', { fg = '#555555', bg = nil })
+      -- Set transparency for Telescope window components
+      vim.api.nvim_set_hl(0, 'TelescopeNormal', { bg = nil })
+      vim.api.nvim_set_hl(0, 'TelescopeBorder', { bg = nil })
+      vim.api.nvim_set_hl(0, 'TelescopePrompt', { bg = nil })
+      vim.api.nvim_set_hl(0, 'TelescopeResults', { bg = nil })
+      vim.api.nvim_set_hl(0, 'TelescopePreview', { bg = nil })
+
+      vim.api.nvim_set_hl(0, 'IblScope', { fg = '#555555' })
     end,
   },
 
@@ -768,22 +803,6 @@ require('lazy').setup({
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
-
-      -- Simple and easy statusline.
-      --  You could remove this setup call if you don't like it,
-      --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
-
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
-
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
@@ -829,15 +848,15 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
-  -- require 'kickstart.plugins.indent_line',
+  require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.indent_line',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you have a Nerd Font, set icons to an empty table which will use the

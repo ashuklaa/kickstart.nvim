@@ -277,18 +277,29 @@ require('lazy').setup({
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
-
-      -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-      }
-    end,
+    opts = {},
+    keys = {
+      {
+        '<leader>?',
+        function()
+          require('which-key').show { global = false }
+        end,
+        desc = 'Buffer Local Keymaps (which-key)',
+      },
+    },
+    -- config = function() -- This is the function that runs, AFTER loading
+    --
+    --
+    --
+    --   -- -- Document existing key chains
+    --   -- require('which-key').register {
+    --   --   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+    --   --   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+    --   --   ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
+    --   --   ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+    --   --   ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+    --   -- }
+    -- end,
   },
 
   -- NOTE: Plugins can specify dependencies.
@@ -540,7 +551,13 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        clangd = {},
+        clangd = {
+          cmd = {
+            'clangd',
+            '--query-driver=/usr/bin/g++', -- Be sure to specify the correct path to the g++ binary
+          },
+          settings = {},
+        },
         gopls = {},
         pyright = {},
         arduino_language_server = {},
@@ -648,12 +665,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
       },
       'saadparwaiz1/cmp_luasnip',

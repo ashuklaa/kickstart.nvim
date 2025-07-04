@@ -278,15 +278,23 @@ require('lazy').setup({
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
     config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
+      local wk = require 'which-key'
+      wk.setup()
 
-      -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+      wk.add {
+        -- suggested spec:
+        {
+          { '<leader>c', group = '[c]ode' },
+          { '<leader>c_', hidden = true },
+          { '<leader>d', group = '[d]ocument' },
+          { '<leader>d_', hidden = true },
+          { '<leader>r', group = '[r]ename' },
+          { '<leader>r_', hidden = true },
+          { '<leader>s', group = '[s]earch' },
+          { '<leader>s_', hidden = true },
+          { '<leader>w', group = '[w]orkspace' },
+          { '<leader>w_', hidden = true },
+        },
       }
     end,
   },
@@ -420,6 +428,16 @@ require('lazy').setup({
       { 'folke/neodev.nvim', opts = {} },
     },
     config = function()
+      local lspconfig = require 'lspconfig'
+      lspconfig.sourcekit.setup {
+        capabilities = {
+          workspace = {
+            didChangeWatchedFiles = {
+              dynamicRegistration = true,
+            },
+          },
+        },
+      }
       -- Brief Aside: **What is LSP?**
       --
       -- LSP is an acronym you've probably heard, but might not understand what it is.
@@ -545,7 +563,12 @@ require('lazy').setup({
         pyright = {},
         arduino_language_server = {},
         bashls = {},
-        tsserver = {},
+        sourcekit = {
+          cmd = { 'xcrun', 'sourcekit-lsp' }, -- explicitly use xcrun to find it
+          filetypes = { 'swift', 'objective-c', 'objective-cpp' },
+          root_dir = require('lspconfig.util').root_pattern('Package.swift', '*.xcodeproj', '*.xcworkspace'),
+        },
+        ts_ls = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -621,6 +644,14 @@ require('lazy').setup({
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
+        javascript = { 'prettierd' },
+        typescript = { 'prettierd' },
+        javascriptreact = { 'prettierd' },
+        typescriptreact = { 'prettierd' },
+        json = { 'prettierd' },
+        markdown = { 'prettierd' },
+        css = { 'prettierd' },
+        html = { 'prettierd' },
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
@@ -648,12 +679,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
       },
       'saadparwaiz1/cmp_luasnip',
@@ -822,8 +853,15 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
+      autotag = {
+        enable = true,
+      },
       indent = { enable = true, disable = { 'ruby' } },
     },
+    dependencies = {
+      { 'windwp/nvim-ts-autotag' },
+    },
+
     config = function(_, opts)
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 

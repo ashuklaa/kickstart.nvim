@@ -428,8 +428,7 @@ require('lazy').setup({
       { 'folke/neodev.nvim', opts = {} },
     },
     config = function()
-      local lspconfig = require 'lspconfig'
-      lspconfig.sourcekit.setup {
+      vim.lsp.config.sourcekit = {
         capabilities = {
           workspace = {
             didChangeWatchedFiles = {
@@ -622,6 +621,8 @@ require('lazy').setup({
           end,
         },
       }
+
+      vim.lsp.enable 'gleam'
     end,
   },
 
@@ -666,15 +667,10 @@ require('lazy').setup({
       -- Snippet Engine & its associated nvim-cmp source
       {
         'L3MON4D3/LuaSnip',
-        build = (function()
-          -- Build Step is needed for regex support in snippets
-          -- This step is not supported in many windows environments
-          -- Remove the below condition to re-enable on windows
-          if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
-            return
-          end
-          return 'make install_jsregexp'
-        end)(),
+        -- follow latest release.
+        version = 'v2.*', -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+        -- install jsregexp (optional!).
+        build = (vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0) and nil or 'make install_jsregexp',
         dependencies = {
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
@@ -769,6 +765,7 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`
+    -- 'loctvl842/monokai-pro.nvim',
     'loctvl842/monokai-pro.nvim',
     priority = 1000, -- make sure to load this before all the other start plugins
     init = function()
